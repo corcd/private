@@ -1,0 +1,32 @@
+{
+  "name": "@gdyfe/private",
+  "version": "1.0.2",
+  "author": "Whzcorcd <whzcorcd@gmail.com>",
+  "description": "私有化部署工具包",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.module.js",
+  "scripts": {
+    "build": "rollup --config"
+  },
+  "keywords": [
+    "gdyfe",
+    "frontend",
+    "private"
+  ],
+  "homepage": "https://github.com/corcd/private",
+  "repository": "https://github.com/corcd/private.git",
+  "devDependencies": {
+    "@babel/core": "^7.12.13",
+    "@babel/preset-env": "^7.12.13",
+    "rollup": "^2.38.5",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-eslint": "^7.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0"
+  }
+}
