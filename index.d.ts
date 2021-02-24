@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2021-02-19 14:26:55
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-02-19 14:29:33
+ * @LastEditTime: 2021-02-22 22:25:01
  * @Description: file content
  */
 declare module '@gdyfe/private' {
@@ -11,6 +11,7 @@ declare module '@gdyfe/private' {
     interface Vue {
       $privateConfig: {
         enabled: boolean
+        independentSymbol: boolean
       }
     }
   }
@@ -18,7 +19,8 @@ declare module '@gdyfe/private' {
   class Private {
     static install: PluginFunction<never>
     static config: {
-      enabled: boolean
+      enabled: boolean,
+      independentSymbol: boolean
     }
   }
   export default Private
