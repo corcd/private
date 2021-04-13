@@ -2,12 +2,12 @@
  * @Author: Whzcorcd
  * @Date: 2021-02-19 16:44:44
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-02-24 15:14:38
+ * @LastEditTime: 2021-04-13 12:42:13
  * @Description: file content
 -->
 # @gdyfe/private
 
-基于 Vue 的私有化部署工具包
+云平台私有化部署标准工具包，支持 Vue 2.x 生态
 
 ## Install
 
@@ -15,9 +15,11 @@
 
 - `dist/private.min.js` (不使用 webpack)
 
+- `dist/index.module.js` (ES Module)
+
 ## Usage
 
-Vue-cli 项目：
+VueCli 项目：
 
 ```javascript
 import Vue from 'vue'
@@ -34,6 +36,20 @@ Vue.use(Private)
 <script src="dist/private.min.js"></script>
 ```
 
+或
+
+```html
+<script src="vue.min.js"></script>
+<!-- must place this line after vue.js -->
+<script type="module" src="dist/index.module.js"></script>
+```
+
+## Configuration
+
+使用 `Private.config` / `Vue.prototype.$privateConfig` 获取/设置工具配置
+
+配置项包含 `enabled` 和 `independentSymbol`，`enabled` 表示是否启用插件自定义指令功能（默认为 `true`），`independentSymbol` 表示是否使用独立的私有化数据获取标识（而非 process.env 上数据，默认为 `true`）
+
 ## Methods
 
 ### include
@@ -46,7 +62,10 @@ Vue.use(Private)
 
 ### computed 属性
 
-提供全局注入的计算属性，`getPrivateStatus` 用于获取工具启用状态，`getPrivateInfo` 用于获取私有化部署的目标环境变量参数
+提供全局注入的计算属性
+
+- `getPrivateStatus` 用于获取工具启用状态
+- `getPrivateInfo` 用于获取私有化部署的目标环境变量参数
 
 ```javascript
 computed: {
@@ -61,9 +80,23 @@ computed: {
 
 ## API
 
-使用 `Private.config` / `Vue.prototype.$privateConfig` 获取/设置工具配置
+### wrapPrivate
 
-配置项包含 `enabled` 和 `independentSymbol`，`enabled` 表示是否启用插件自定义指令功能（默认为 `true`），`independentSymbol` 表示是否使用独立的私有化数据获取标识（而非 process.env 上数据，默认为 `true`）
+包装函数，根据使用模式和匹配的环境变量参数，来决定是否执行回调函数
+
+`const wrapPrivate: (pattern: string, value: any[], fn: Function) => void`
+
+- pattern：使用模式，支持 `include` 和 `exclude`，`include` 表示允许执行，`exclude` 表示忽略执行
+- value：接受一个数组参数（非 String），其中包含的元素即为匹配的环境变量参数
+- fn：回调函数
+
+```javascript
+import { wrapPrivate } from '@gdyfe/private'
+
+wrapPrivate('include', ['***'], () => {
+  // doing something
+})
+```
 
 ## Sample
 
@@ -81,6 +114,12 @@ computed: {
   </div>
 </template>
 ```
+
+## Todo
+
+- [ ] 支持 Vue 3 生态
+- [ ] 路由级的函数 API
+- [ ] 低侵入式私有化权限控制
 
 ### License
 

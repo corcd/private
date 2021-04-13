@@ -1,29 +1,29 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.private = factory());
-}(this, (function () { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.private = global.private || {}));
+}(this, (function (exports) { 'use strict';
 
   /*
    * @Author: Whzcorcd
    * @Date: 2021-02-10 21:18:39
    * @LastEditors: Whzcorcd
-   * @LastEditTime: 2021-02-24 14:57:56
+   * @LastEditTime: 2021-04-13 11:44:01
    * @Description: file content
    */
-  var VuePrivateConfig = {
+  var PrivateConfig = {
     enabled: true,
     independentSymbol: true
   };
-  var Private = {
+  var VuePrivatePlugin = {
     install: function install(Vue) {
-      Vue.prototype.$privateConfig = VuePrivateConfig;
-      Vue.directive('private', function (el, binding, vnode) {
-        if (!VuePrivateConfig.enabled) {
+      Vue.prototype.$privateConfig = PrivateConfig;
+      Vue.directive('private', function (el, binding) {
+        if (!PrivateConfig.enabled) {
           return;
         }
 
-        var target = VuePrivateConfig.independentSymbol ? PRIVATE_RUN_SERVER : process.env.run_server;
+        var target = PrivateConfig.independentSymbol ? PRIVATE_RUN_SERVER : process.env.run_server;
         console.log('PRIVATE:', target);
 
         if (String(target).length === 0) {
@@ -64,19 +64,43 @@
       Vue.mixin({
         computed: {
           getPrivateStatus: function getPrivateStatus() {
-            var status = VuePrivateConfig.independentSymbol ? PRIVATE_STATUS : process.env["private"];
+            var status = PrivateConfig.independentSymbol ? PRIVATE_STATUS : process.env["private"];
             return status;
           },
           getPrivateInfo: function getPrivateInfo() {
-            var target = VuePrivateConfig.independentSymbol ? PRIVATE_RUN_SERVER : process.env.run_server;
+            var target = PrivateConfig.independentSymbol ? PRIVATE_RUN_SERVER : process.env.run_server;
             return target;
           }
         }
       });
     },
-    config: VuePrivateConfig
+    config: PrivateConfig
+  };
+  var wrapPrivate = function wrapPrivate() {
+    var pattern = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'include';
+    var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+    var fn = arguments.length > 2 ? arguments[2] : undefined;
+
+    if (!Array.isArray(value) || typeof value === 'string') {
+      throw new Error('PRIVATE: 非法的值');
+    }
+
+    if (typeof pattern !== 'string' || pattern !== 'include' && pattern !== 'exclude') {
+      throw new Error('PRIVATE: 不合法的方式');
+    }
+
+    var target = PrivateConfig.independentSymbol ? PRIVATE_RUN_SERVER : process.env.run_server;
+
+    if (value.includes(target)) {
+      pattern === 'include' && fn();
+    } else {
+      pattern === 'exclude' && fn();
+    }
   };
 
-  return Private;
+  exports.default = VuePrivatePlugin;
+  exports.wrapPrivate = wrapPrivate;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
 
 })));

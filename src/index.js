@@ -2,24 +2,24 @@
  * @Author: Whzcorcd
  * @Date: 2021-02-10 21:18:39
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-02-24 14:57:56
+ * @LastEditTime: 2021-04-13 11:44:01
  * @Description: file content
  */
-const VuePrivateConfig = {
+const PrivateConfig = {
   enabled: true,
   independentSymbol: true,
 }
 
-const Private = {
+const VuePrivatePlugin = {
   install: (Vue) => {
-    Vue.prototype.$privateConfig = VuePrivateConfig
+    Vue.prototype.$privateConfig = PrivateConfig
 
-    Vue.directive('private', (el, binding, vnode) => {
-      if (!VuePrivateConfig.enabled) {
+    Vue.directive('private', (el, binding) => {
+      if (!PrivateConfig.enabled) {
         return
       }
 
-      const target = VuePrivateConfig.independentSymbol
+      const target = PrivateConfig.independentSymbol
         ? PRIVATE_RUN_SERVER
         : process.env.run_server
 
@@ -58,13 +58,13 @@ const Private = {
     Vue.mixin({
       computed: {
         getPrivateStatus() {
-          const status = VuePrivateConfig.independentSymbol
+          const status = PrivateConfig.independentSymbol
             ? PRIVATE_STATUS
             : process.env.private
           return status
         },
         getPrivateInfo() {
-          const target = VuePrivateConfig.independentSymbol
+          const target = PrivateConfig.independentSymbol
             ? PRIVATE_RUN_SERVER
             : process.env.run_server
           return target
@@ -72,7 +72,29 @@ const Private = {
       },
     })
   },
-  config: VuePrivateConfig,
+  config: PrivateConfig,
 }
 
-export default Private
+export const wrapPrivate = (pattern = 'include', value = [], fn) => {
+  if (!Array.isArray(value) || typeof value === 'string') {
+    throw new Error('PRIVATE: 非法的值')
+  }
+  if (
+    typeof pattern !== 'string' ||
+    (pattern !== 'include' && pattern !== 'exclude')
+  ) {
+    throw new Error('PRIVATE: 不合法的方式')
+  }
+
+  const target = PrivateConfig.independentSymbol
+    ? PRIVATE_RUN_SERVER
+    : process.env.run_server
+
+  if (value.includes(target)) {
+    pattern === 'include' && fn()
+  } else {
+    pattern === 'exclude' && fn()
+  }
+}
+
+export default VuePrivatePlugin
