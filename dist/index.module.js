@@ -1,8 +1,45 @@
 /*
  * @Author: Whzcorcd
+ * @Date: 2021-04-19 15:06:26
+ * @LastEditors: Whzcorcd
+ * @LastEditTime: 2021-04-19 15:41:16
+ * @Description: file content
+ */
+var isLegalTarget = function isLegalTarget(value) {
+  if (String(value).length === 0) {
+    throw new Error('PRIVATE: 缺少必要的环境变量');
+  }
+
+  console.log('PRIVATE:', value);
+  return true;
+};
+var isLegalParams = function isLegalParams(value) {
+  if (!Array.isArray(value) || typeof value === 'string') {
+    throw new Error('PRIVATE: 非法的值');
+  }
+
+  return true;
+};
+var isLegalPattern = function isLegalPattern(value) {
+  if (typeof value !== 'string' || value !== 'include' && value !== 'exclude') {
+    throw new Error('PRIVATE: 不合法的方式');
+  }
+
+  return true;
+};
+var isFunction = function isFunction(value) {
+  if (typeof value !== 'function') {
+    throw new Error('PRIVATE: 不合法的执行函数');
+  }
+
+  return true;
+};
+
+/*
+ * @Author: Whzcorcd
  * @Date: 2021-02-10 21:18:39
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-04-14 16:38:19
+ * @LastEditTime: 2021-04-19 15:42:06
  * @Description: file content
  */
 var PrivateConfig = {
@@ -19,21 +56,14 @@ var VuePrivatePlugin = {
         }
 
         var target = PrivateConfig.independentSymbol ? PRIVATE_RUN_SERVER : process.env.run_server;
-        console.log('PRIVATE:', target);
-
-        if (String(target).length === 0) {
-          throw new Error('PRIVATE: 缺少必要的环境变量');
-        }
-
+        isLegalTarget(target);
         var arg = binding.arg,
             value = binding.value;
 
         switch (arg) {
           case 'include':
             {
-              if (!Array.isArray(value) || typeof value === 'string') {
-                throw new Error('PRIVATE: 非法的值');
-              }
+              isLegalParams(value);
 
               if (!value.includes(target)) {
                 el.parentNode && el.parentNode.removeChild(el);
@@ -44,9 +74,7 @@ var VuePrivatePlugin = {
 
           case 'exclude':
             {
-              if (!Array.isArray(value) || typeof value === 'string') {
-                throw new Error('PRIVATE: 非法的值');
-              }
+              isLegalParams(value);
 
               if (value.includes(target)) {
                 el.parentNode && el.parentNode.removeChild(el);
@@ -60,11 +88,10 @@ var VuePrivatePlugin = {
     Vue.mixin({
       computed: {
         getPrivateStatus: function getPrivateStatus() {
-          var status = PrivateConfig.independentSymbol ? PRIVATE_STATUS : process.env["private"];
-          return status;
+          var privateStatus = PrivateConfig.independentSymbol ? PRIVATE_STATUS : process.env["private"];
+          return privateStatus;
         },
         getPrivateInfo: function getPrivateInfo() {
-          var target = PrivateConfig.independentSymbol ? PRIVATE_RUN_SERVER : process.env.run_server;
           return target;
         }
       }
@@ -75,24 +102,23 @@ var VuePrivatePlugin = {
 var wrapPrivate = function wrapPrivate() {
   var pattern = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'include';
   var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-  var fn = arguments.length > 2 ? arguments[2] : undefined;
-
-  if (!Array.isArray(value) || typeof value === 'string') {
-    throw new Error('PRIVATE: 非法的值');
-  }
-
-  if (typeof pattern !== 'string' || pattern !== 'include' && pattern !== 'exclude') {
-    throw new Error('PRIVATE: 不合法的方式');
-  }
-
+  var fn = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : function () {};
+  isLegalPattern(pattern);
+  isLegalParams(value);
+  isFunction(fn);
   var target = PrivateConfig.independentSymbol ? PRIVATE_RUN_SERVER : process.env.run_server;
+  var config = PrivateConfig.independentSymbol ? PRIVATE_CONFIG : process.env;
+  isLegalTarget(target);
 
   if (value.includes(target)) {
-    pattern === 'include' && fn();
+    pattern === 'include' && fn(config);
   } else {
-    pattern === 'exclude' && fn();
+    pattern === 'exclude' && fn(config);
   }
+};
+var getPrivateProperty = function getPrivateProperty() {
+  return PrivateConfig.independentSymbol ? PRIVATE_CONFIG : process.env;
 };
 
 export default VuePrivatePlugin;
-export { wrapPrivate };
+export { getPrivateProperty, wrapPrivate };
