@@ -1,9 +1,18 @@
 {
+  "plugins": [
+    "@babel/plugin-transform-runtime"
+  ],
   "presets": [
+    "@babel/preset-typescript",
     [
       "@babel/preset-env",
       {
-        "modules": false
+        "modules": false,
+        "useBuiltIns": "usage",
+        "corejs": 3,
+        "targets": {
+          "esmodules": true
+        }
       }
     ]
   ]

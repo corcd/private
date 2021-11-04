@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2021-02-19 14:26:55
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-02-22 22:25:01
+ * @LastEditTime: 2021-11-04 15:30:20
  * @Description: file content
  */
 declare module '@gdyfe/private' {
@@ -12,16 +12,13 @@ declare module '@gdyfe/private' {
       $privateConfig: {
         enabled: boolean
         independentSymbol: boolean
+        target: string
       }
     }
   }
 
   class Private {
     static install: PluginFunction<never>
-    static config: {
-      enabled: boolean,
-      independentSymbol: boolean
-    }
   }
   export default Private
 }

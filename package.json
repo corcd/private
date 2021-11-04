@@ -12,24 +12,81 @@
   "module": "dist/index.module.js",
   "types": "index.d.ts",
   "typings": "index.d.ts",
+  "sideEffects": false,
   "scripts": {
+    "release": "standard-version",
+    "release:minor": "standard-version -r minor",
+    "release:patch": "standard-version -r patch",
+    "commit": "git-cz",
+    "prepare": "husky install",
     "build": "rm -rf dist/ && rollup --config"
+  },
+  "lint-staged": {
+    "*.{js,vue}": "yarn lint",
+    "*.{css,vue}": "stylelint"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -e $GIT_PARAMS"
+    }
   },
   "keywords": [
     "gdyfe",
     "frontend",
-    "private"
+    "private",
+    "define",
+    "webpack",
+    "plugin"
   ],
   "homepage": "https://github.com/corcd/private",
   "repository": "https://github.com/corcd/private.git",
+  "dependencies": {
+    "cosmiconfig": "^7.0.1",
+    "lodash-es": "^4.17.21",
+    "webpack": "^5.61.0"
+  },
+  "peerDependencies": {
+    "webpack": ">=4.0.0"
+  },
   "devDependencies": {
     "@babel/core": "^7.12.13",
+    "@babel/plugin-transform-runtime": "^7.16.0",
     "@babel/preset-env": "^7.12.13",
+    "@babel/preset-typescript": "^7.16.0",
+    "@babel/runtime": "^7.16.0",
+    "@commitlint/cli": "^14.1.0",
+    "@commitlint/config-conventional": "^14.1.0",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.0.6",
+    "@types/lodash-es": "^4.17.5",
+    "@types/node": "^16.11.6",
+    "@types/webpack": "^5.28.0",
+    "@typescript-eslint/eslint-plugin": "^5.3.0",
+    "@typescript-eslint/parser": "^5.3.0",
+    "commitizen": "^4.2.4",
+    "commitlint-config-cz": "^0.13.2",
+    "conventional-changelog": "^3.1.24",
+    "conventional-changelog-cli": "^2.1.1",
+    "conventional-commits-detector": "^1.0.3",
+    "conventional-recommended-bump": "^6.1.0",
+    "core-js": "^3.19.1",
+    "cz-customizable": "^6.3.0",
+    "eslint": "^8.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^11.2.6",
+    "prettier": "^2.4.1",
     "rollup": "^2.38.5",
-    "rollup-plugin-babel": "^4.4.0",
-    "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-eslint": "^7.0.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup-plugin-polyfill-node": "^0.7.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "standard-version": "^9.3.2",
+    "tslib": "^2.3.1",
+    "typescript": "^4.4.4",
+    "validate-commit-msg": "^2.14.0"
   }
 }
