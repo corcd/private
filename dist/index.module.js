@@ -13755,61 +13755,7 @@ function normalizeOptions(moduleName, options) {
   return normalizedOptions;
 }
 
-const PRIVATE_RUN_SERVER = String(process.env.run_server) || '';
-const PRIVATE_STATUS = Boolean(process.env.private) || false;
-const MODULE_NAME = 'private';
-const GLOBAL_KEY = 'PRIVATE_CONFIG';
-const loadConfig = () => {
-    const explorerSync = cosmiconfigSync_1(MODULE_NAME, {
-        searchPlaces: [
-            `.${MODULE_NAME}rc`,
-            `.${MODULE_NAME}rc.json`,
-            `.${MODULE_NAME}rc.yaml`,
-            `.${MODULE_NAME}rc.yml`,
-            `.${MODULE_NAME}rc.js`,
-            `.${MODULE_NAME}rc.cjs`,
-            `${MODULE_NAME}.config.js`,
-            `${MODULE_NAME}.config.cjs`,
-        ],
-    });
-    try {
-        const result = explorerSync.search();
-        console.log('result', result);
-        if (result && result.config) {
-            return result.config;
-        }
-        throw new Error(`No Private config found for: ${PRIVATE_RUN_SERVER}`);
-    }
-    catch (error) {
-        throw error;
-    }
-};
-
-const deepJsonStringify = (definitions) => {
-    return forEach(definitions, (val, key) => {
-        definitions[key] = isString(val)
-            ? JSON.stringify(val)
-            : deepJsonStringify(definitions[key]);
-    });
-};
-class PrivateDefinePlugin extends DefinePlugin {
-    constructor() {
-        const { targets } = loadConfig();
-        const clonedDefinitions = cloneDeep(targets[PRIVATE_RUN_SERVER] || {});
-        super(deepJsonStringify({
-            [GLOBAL_KEY]: clonedDefinitions,
-            PRIVATE_RUN_SERVER,
-            PRIVATE_STATUS,
-        }));
-    }
-}
-
-var index$3 = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  PrivateDefinePlugin: PrivateDefinePlugin,
-  'default': PrivateDefinePlugin
-});
-
+const isBrowser = () => globalThis === window;
 const isLegalTarget = (value) => {
     if (String(value).length === 0) {
         throw new Error('PRIVATE: 缺少必要的环境变量');
@@ -13837,18 +13783,96 @@ const isFunction = (value) => {
     return true;
 };
 
+const PRIVATE_RUN_SERVER = 'APP_PRIVATE_RUN_SERVER';
+const PRIVATE_STATUS = 'APP_PRIVATE_STATUS';
+const PRIVATE_CONFIG = 'APP_PRIVATE_CONFIG';
+const PRIVATE_GLOBAL_KEY = 'APP_PRIVATE_DATA';
+const MODULE_NAME = 'private';
+const generateConfig = () => {
+    if (!isBrowser()) {
+        throw new Error('PRIVATE: the current environment is not Browser Runtime');
+    }
+    const privateConfig = APP_PRIVATE_CONFIG;
+    return privateConfig ? {
+        enabled: privateConfig.enabled,
+        independentSymbol: privateConfig.independentSymbol
+    } : {
+        enabled: true,
+        independentSymbol: true
+    };
+};
+const loadConfig = () => {
+    if (isBrowser()) {
+        throw new Error('PRIVATE: the current environment is not Node Runtime');
+    }
+    const explorerSync = cosmiconfigSync_1(MODULE_NAME, {
+        searchPlaces: [
+            `.${MODULE_NAME}rc`,
+            `.${MODULE_NAME}rc.json`,
+            `.${MODULE_NAME}rc.yaml`,
+            `.${MODULE_NAME}rc.yml`,
+            `.${MODULE_NAME}rc.js`,
+            `.${MODULE_NAME}rc.cjs`,
+            `${MODULE_NAME}.config.js`,
+            `${MODULE_NAME}.config.cjs`,
+        ],
+    });
+    try {
+        const result = explorerSync.search();
+        console.log('result', result);
+        if (result && result.config) {
+            return result.config;
+        }
+        throw new Error('PRIVATE: no private config file found');
+    }
+    catch (error) {
+        throw error;
+    }
+};
+
+const deepJsonStringify = (definitions) => {
+    return forEach(definitions, (val, key) => {
+        definitions[key] = isString(val)
+            ? JSON.stringify(val)
+            : deepJsonStringify(definitions[key]);
+    });
+};
+class PrivateDefinePlugin extends DefinePlugin {
+    constructor() {
+        const { enabled, independentSymbol, targets } = loadConfig();
+        const clonedDefinitions = cloneDeep(targets[PRIVATE_RUN_SERVER] || {});
+        const config = {
+            enabled,
+            independentSymbol
+        };
+        super(deepJsonStringify({
+            [PRIVATE_GLOBAL_KEY]: clonedDefinitions,
+            [PRIVATE_CONFIG]: config,
+            [PRIVATE_RUN_SERVER]: String(process.env.run_server) || '',
+            [PRIVATE_STATUS]: Boolean(process.env.private) || false,
+        }));
+    }
+}
+
+var index$3 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  PrivateDefinePlugin: PrivateDefinePlugin,
+  'default': PrivateDefinePlugin
+});
+
+const privateRunServer$1 = APP_PRIVATE_RUN_SERVER;
+const privateData$1 = APP_PRIVATE_DATA;
+const { independentSymbol: independentSymbol$1 } = generateConfig();
 const wrapPrivate = (pattern = 'include', value = [], fn = (v) => { }) => {
     isLegalPattern(pattern);
     for (const i in value) {
         isLegalParams(i);
     }
     isFunction(fn);
-    const { independentSymbol, targets } = loadConfig();
-    const privateConfig = (targets[PRIVATE_RUN_SERVER] || {});
-    const target = independentSymbol
-        ? PRIVATE_RUN_SERVER
+    const target = independentSymbol$1
+        ? privateRunServer$1
         : process.env.run_server;
-    const config = independentSymbol ? privateConfig : process.env;
+    const config = independentSymbol$1 ? (privateData$1 || {}) : process.env;
     isLegalTarget(target);
     if (value.includes(target)) {
         pattern === 'include' && fn(config);
@@ -13858,9 +13882,7 @@ const wrapPrivate = (pattern = 'include', value = [], fn = (v) => { }) => {
     }
 };
 const getPrivateProperty = () => {
-    const { independentSymbol, targets } = loadConfig();
-    const privateConfig = (targets[PRIVATE_RUN_SERVER] || {});
-    return independentSymbol ? privateConfig : process.env;
+    return independentSymbol$1 ? (privateData$1 || {}) : process.env;
 };
 var WarpPlugin = { wrapPrivate, getPrivateProperty };
 
@@ -13869,12 +13891,15 @@ var index$2 = /*#__PURE__*/Object.freeze({
   'default': WarpPlugin
 });
 
+const privateRunServer = APP_PRIVATE_RUN_SERVER;
+const privateStatus = APP_PRIVATE_STATUS;
+const privateData = APP_PRIVATE_DATA;
+const { enabled, independentSymbol } = generateConfig();
 const VuePrivatePlugin = {
     install: (Vue) => {
         const globalPrototype = Vue.version.slice(0, 2) === '3.' ? Vue.config.globalProperties : Vue.prototype;
-        const { enabled, independentSymbol } = loadConfig();
         const target = independentSymbol
-            ? PRIVATE_RUN_SERVER
+            ? privateRunServer
             : process.env.run_server;
         globalPrototype.$privateConfig = { enabled, independentSymbol, target };
         Vue.directive('private', {
@@ -13906,13 +13931,18 @@ const VuePrivatePlugin = {
             computed: {
                 privateStatus() {
                     return independentSymbol
-                        ? PRIVATE_STATUS
+                        ? privateStatus
                         : process.env.private;
                 },
-                privateInfo() {
+                privateRunServer() {
                     return independentSymbol
-                        ? PRIVATE_RUN_SERVER
+                        ? privateRunServer
                         : process.env.run_server;
+                },
+                privateData() {
+                    return independentSymbol
+                        ? privateData
+                        : process.env;
                 },
             },
         });
