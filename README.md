@@ -2,16 +2,18 @@
  * @Author: Whzcorcd
  * @Date: 2021-02-19 16:44:44
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-04 17:32:30
+ * @LastEditTime: 2021-11-05 14:20:00
  * @Description: file content
 -->
 # @gdyfe/private
 
 云平台前端私有化部署标准工具包 V2
 
-V2 版本存在破坏性更新，若仍使用 [V1 版本](https://github.com/corcd/private/tree/v1.2.2)
+V2 版本存在破坏性更新，若仍使用旧版本，请访问 [V1 版本](https://github.com/corcd/private/tree/v1.2.2)
 
 ## Install
+
+#### NPM 安装
 
 - `npm install --save @gdyfe/private`
 
@@ -19,17 +21,19 @@ V2 版本存在破坏性更新，若仍使用 [V1 版本](https://github.com/cor
 
 - `yarn add @gdyfe/private`
 
+#### 直接引用
+
 - `dist/index.module.js` (ES Module)
 
 ## Description
 
 `@gdyfe/private` 在 V2 版本分成了三个部分，分别为 `PrivateDefinePlugin`、`WarpPlugin` 和 `VuePrivatePlugin`
 
-`PrivateDefinePlugin` 整合了原 `@gdyfe/private-define-plugin` 插件的能力，用以在 Webpack 环境下定义全局环境变量
+**`PrivateDefinePlugin`** 整合了原 `@gdyfe/private-define-plugin` 插件的能力，用以在 Webpack 环境下定义全局环境变量
 
-`WarpPlugin` 即为原插件内 `wrapPrivate()` 方法和 `getPrivateProperty()` 方法的集合
+**`WarpPlugin`** 即为原插件内 `wrapPrivate()` 方法和 `getPrivateProperty()` 方法的集合
 
-`VuePrivatePlugin` 即为原 Vue 自定义指令插件
+**`VuePrivatePlugin`** 即为原 Vue 自定义指令插件
 
 ## Usage
 
@@ -114,7 +118,8 @@ createApp(app).use(VuePrivatePlugin)
 提供全局注入的计算属性
 
 - ~~`getPrivateStatus`~~ `this.privateStatus` 用于获取工具启用状态
-- ~~`getPrivateInfo`~~ `this.privateInfo` 用于获取私有化部署的目标环境变量参数
+- ~~`getPrivateInfo`~~ `this.privateRunServer` 用于获取私有化部署的目标环境
+- `this.privateData` 用于获取私有化部署目标对应的环境变量参数
 
 ## Configuration
 
@@ -128,6 +133,16 @@ createApp(app).use(VuePrivatePlugin)
 - `independentSymbol` 表示是否使用独立命名的私有化数据获取标识（而非默认的 process.env 数据，默认值为 `true`）
 - `targets` 表示对应键名的环境下私有化全局配置变量对象
 
+> 下列键名为插件保留的关键字，不能用作于 `targets` 下私有化全局配置变量的键名，否则可能会导致插件无法正常
+>
+> ```javascript
+> const PRIVATE_RUN_SERVER: string = 'APP_PRIVATE_RUN_SERVER'
+> const PRIVATE_STATUS: string = 'APP_PRIVATE_STATUS'
+> const PRIVATE_CONFIG: string = 'APP_PRIVATE_CONFIG'
+> const PRIVATE_GLOBAL_KEY: string = 'APP_PRIVATE_DATA'
+> const MODULE_NAME: string = 'private'
+> ```
+
 ## Sample
 
 ### private.config.js
@@ -135,19 +150,20 @@ createApp(app).use(VuePrivatePlugin)
 ```javascript
 module.exports = {
   enabled: true,
-  independentSymbol: true,
+  independentSymbol: false,
   targets:
   {
     cm: {
-      APP_PORT: '80',
-      APP_SSL_PORT: '443',
-      APP_RUN_ENV: 'production'
+      'APP_PORT': '80',
+      'APP_SSL_PORT': '443',
+      'APP_RUN_ENV': 'production'
     },
     vvku: {
-      APP_PORT: '80',
-      APP_SSL_PORT: '443',
-      APP_RUN_ENV: 'production'
-    }
+      'APP_PORT': '80',
+      'APP_SSL_PORT': '443',
+      'APP_RUN_ENV': 'production'
+    },
+    ...
   }
 }
 ```

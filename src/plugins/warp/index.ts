@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2021-11-04 14:33:46
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-05 11:21:43
+ * @LastEditTime: 2021-11-05 14:20:31
  * @Description: file content
  */
 import { isFunction, isLegalParams, isLegalPattern, isLegalTarget } from "@/utils"
@@ -15,7 +15,7 @@ const privateData = APP_PRIVATE_DATA
 
 const { independentSymbol } = generateConfig()
 
-const wrapPrivate = (pattern = 'include', value: string[] = [], fn = <T>(v: T) => { }) => {
+export const wrapPrivate = (pattern = 'include', value: string[] = [], fn = <T>(v: T) => { }) => {
   isLegalPattern(pattern)
   for (const i in value) {
     isLegalParams(i)
@@ -36,7 +36,7 @@ const wrapPrivate = (pattern = 'include', value: string[] = [], fn = <T>(v: T) =
   }
 }
 
-const getPrivateProperty = () => {
+export const getPrivateProperty = () => {
   return independentSymbol ? (privateData || {}) : process.env
 }
 
