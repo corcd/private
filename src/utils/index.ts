@@ -2,9 +2,11 @@
  * @Author: Whzcorcd
  * @Date: 2021-04-19 15:06:26
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-04 15:18:49
+ * @LastEditTime: 2021-11-05 10:43:49
  * @Description: file content
  */
+export const isBrowser = () => this === window
+
 export const isLegalTarget = <T>(value: T) => {
   if (String(value).length === 0) {
     throw new Error('PRIVATE: 缺少必要的环境变量')

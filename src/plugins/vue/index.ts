@@ -2,21 +2,29 @@
  * @Author: Whzcorcd
  * @Date: 2021-11-04 14:34:36
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-04 15:09:37
+ * @LastEditTime: 2021-11-05 11:22:33
  * @Description: file content
  */
 import {
   isLegalTarget,
   isLegalParams,
 } from '@/utils'
-import { PRIVATE_RUN_SERVER, PRIVATE_STATUS, loadConfig } from '@/config'
+import { generateConfig } from '@/config'
+
+// @ts-ignore 浏览器端环境变量忽略检查
+const privateRunServer = APP_PRIVATE_RUN_SERVER
+// @ts-ignore 浏览器端环境变量忽略检查
+const privateStatus = APP_PRIVATE_STATUS
+// @ts-ignore 浏览器端环境变量忽略检查
+const privateData = APP_PRIVATE_DATA
+
+const { enabled, independentSymbol } = generateConfig()
 
 const VuePrivatePlugin = {
   install: (Vue: any) => {
     const globalPrototype = Vue.version.slice(0, 2) === '3.' ? Vue.config.globalProperties : Vue.prototype
-    const { enabled, independentSymbol } = loadConfig()
     const target = independentSymbol
-      ? PRIVATE_RUN_SERVER
+      ? privateRunServer
       : (process.env.run_server as string)
 
     globalPrototype.$privateConfig = { enabled, independentSymbol, target }
@@ -56,13 +64,18 @@ const VuePrivatePlugin = {
       computed: {
         privateStatus() {
           return independentSymbol
-            ? PRIVATE_STATUS
+            ? privateStatus
             : process.env.private
         },
-        privateInfo() {
+        privateRunServer() {
           return independentSymbol
-            ? PRIVATE_RUN_SERVER
+            ? privateRunServer
             : process.env.run_server
+        },
+        privateData() {
+          return independentSymbol
+            ? privateData
+            : process.env
         },
       },
     })

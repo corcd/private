@@ -2,11 +2,18 @@
  * @Author: Whzcorcd
  * @Date: 2021-11-04 14:33:46
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-04 15:22:18
+ * @LastEditTime: 2021-11-05 11:21:43
  * @Description: file content
  */
 import { isFunction, isLegalParams, isLegalPattern, isLegalTarget } from "@/utils"
-import { PRIVATE_RUN_SERVER, loadConfig } from '@/config'
+import { generateConfig } from '@/config'
+
+// @ts-ignore 浏览器端环境变量忽略检查
+const privateRunServer = APP_PRIVATE_RUN_SERVER
+// @ts-ignore 浏览器端环境变量忽略检查
+const privateData = APP_PRIVATE_DATA
+
+const { independentSymbol } = generateConfig()
 
 const wrapPrivate = (pattern = 'include', value: string[] = [], fn = <T>(v: T) => { }) => {
   isLegalPattern(pattern)
@@ -15,12 +22,11 @@ const wrapPrivate = (pattern = 'include', value: string[] = [], fn = <T>(v: T) =
   }
   isFunction(fn)
 
-  const { independentSymbol, targets } = loadConfig()
-  const privateConfig = (targets[PRIVATE_RUN_SERVER] || {})
   const target = independentSymbol
-    ? PRIVATE_RUN_SERVER
+    ? privateRunServer
     : (process.env.run_server as string)
-  const config = independentSymbol ? privateConfig : process.env
+  const config = independentSymbol ? (privateData || {}) : process.env
+
   isLegalTarget(target)
 
   if (value.includes(target)) {
@@ -31,9 +37,7 @@ const wrapPrivate = (pattern = 'include', value: string[] = [], fn = <T>(v: T) =
 }
 
 const getPrivateProperty = () => {
-  const { independentSymbol, targets } = loadConfig()
-  const privateConfig = (targets[PRIVATE_RUN_SERVER] || {})
-  return independentSymbol ? privateConfig : process.env
+  return independentSymbol ? (privateData || {}) : process.env
 }
 
 export default { wrapPrivate, getPrivateProperty }

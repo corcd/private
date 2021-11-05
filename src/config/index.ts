@@ -2,10 +2,11 @@
  * @Author: Whzcorcd
  * @Date: 2021-02-22 14:10:58
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-04 15:24:14
+ * @LastEditTime: 2021-11-05 11:25:26
  * @Description: file content
  */
 import { cosmiconfigSync } from 'cosmiconfig'
+import { isBrowser } from '@/utils'
 
 export interface IConfig {
   enabled: boolean
@@ -13,12 +14,33 @@ export interface IConfig {
   targets: Record<string, Record<string, string>>
 }
 
-export const PRIVATE_RUN_SERVER: string = String(process.env.run_server) || ''
-export const PRIVATE_STATUS: boolean = Boolean(process.env.private) || false
+export const PRIVATE_RUN_SERVER: string = 'APP_PRIVATE_RUN_SERVER'
+export const PRIVATE_STATUS: string = 'APP_PRIVATE_STATUS'
+export const PRIVATE_CONFIG: string = 'APP_PRIVATE_CONFIG'
+export const PRIVATE_GLOBAL_KEY: string = 'APP_PRIVATE_DATA'
 export const MODULE_NAME: string = 'private'
-export const GLOBAL_KEY: string = 'PRIVATE_CONFIG'
+
+export const generateConfig = () => {
+  if (!isBrowser()) {
+    throw new Error('PRIVATE: the current environment is not Browser Runtime')
+  }
+
+  // @ts-ignore 浏览器端环境变量忽略检查
+  const privateConfig = APP_PRIVATE_CONFIG
+  return privateConfig ? {
+    enabled: privateConfig.enabled,
+    independentSymbol: privateConfig.independentSymbol
+  } : {
+    enabled: true,
+    independentSymbol: true
+  }
+}
 
 export const loadConfig = () => {
+  if (isBrowser()) {
+    throw new Error('PRIVATE: the current environment is not Node Runtime')
+  }
+
   const explorerSync = cosmiconfigSync(MODULE_NAME, {
     searchPlaces: [
       `.${MODULE_NAME}rc`,
@@ -42,7 +64,7 @@ export const loadConfig = () => {
     if (result && result.config) {
       return result.config as IConfig
     }
-    throw new Error(`No Private config found for: ${PRIVATE_RUN_SERVER}`)
+    throw new Error('PRIVATE: no private config file found')
   } catch (error) {
     throw error
   }

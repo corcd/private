@@ -2,12 +2,12 @@
  * @Author: Whzcorcd
  * @Date: 2021-02-22 11:02:24
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-04 15:29:04
+ * @LastEditTime: 2021-11-05 11:09:33
  * @Description: file content
  */
 import { DefinePlugin } from 'webpack'
 import { each, isString, cloneDeep } from 'lodash-es'
-import { PRIVATE_RUN_SERVER, PRIVATE_STATUS, GLOBAL_KEY, loadConfig } from '@/config'
+import { PRIVATE_RUN_SERVER, PRIVATE_STATUS, PRIVATE_CONFIG, PRIVATE_GLOBAL_KEY, loadConfig } from '@/config'
 
 const deepJsonStringify = (definitions: any) => {
   return each(definitions, (val: any, key: string) => {
@@ -19,13 +19,18 @@ const deepJsonStringify = (definitions: any) => {
 
 export class PrivateDefinePlugin extends DefinePlugin {
   constructor() {
-    const { targets } = loadConfig()
+    const { enabled, independentSymbol, targets } = loadConfig()
     const clonedDefinitions = cloneDeep(targets[PRIVATE_RUN_SERVER] || {})
+    const config = {
+      enabled,
+      independentSymbol
+    }
     super(
       deepJsonStringify({
-        [GLOBAL_KEY]: clonedDefinitions,
-        PRIVATE_RUN_SERVER,
-        PRIVATE_STATUS,
+        [PRIVATE_GLOBAL_KEY]: clonedDefinitions,
+        [PRIVATE_CONFIG]: config,
+        [PRIVATE_RUN_SERVER]: String(process.env.run_server) || '',
+        [PRIVATE_STATUS]: Boolean(process.env.private) || false,
       })
     )
   }
