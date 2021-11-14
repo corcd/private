@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2021-02-11 14:26:07
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-04 16:26:15
+ * @LastEditTime: 2021-11-12 16:40:22
  * @Description: file content
  */
 import babel from '@rollup/plugin-babel'
@@ -13,33 +13,32 @@ import typescript from 'rollup-plugin-typescript2'
 import { terser } from 'rollup-plugin-terser'
 // import nodePolyfills from 'rollup-plugin-polyfill-node'
 
-export default {
+const MODULE_NAME = 'private'
+
+export default [{
   input: 'src/index.ts',
-  output: [
-    {
-      name: 'private',
-      file: 'dist/index.js',
-      format: 'umd',
-      exports: 'named',
-      extend: true,
-      globals: { 'webpack': 'webpack' },
-      plugins: [
-        terser({
-          compress: {
-            ecma: 5,
-            pure_getters: true,
-          },
-        }),
-      ],
-    },
-    {
-      name: 'private',
-      file: 'dist/index.module.js',
-      format: 'esm',
-      exports: 'named',
-      extend: true,
-      globals: { 'webpack': 'webpack' },
-    },
+  output: [{
+    name: MODULE_NAME,
+    file: 'dist/index.js',
+    format: 'umd',
+    exports: 'named',
+    extend: true,
+    plugins: [
+      terser({
+        compress: {
+          ecma: 5,
+          pure_getters: true,
+        },
+      }),
+    ],
+  },
+  {
+    name: MODULE_NAME,
+    file: 'dist/index.module.js',
+    format: 'esm',
+    exports: 'named',
+    extend: true,
+  },
   ],
   plugins: [
     resolve({
@@ -51,7 +50,52 @@ export default {
     //   { include: ['os', 'path', 'util'] }
     // ),
     json(),
-    commonjs(),
+    commonjs({
+      ignoreDynamicRequires: true
+    }),
+    typescript({
+      tsconfig: 'tsconfig.json',
+    }),
+    babel({
+      exclude: 'node_modules/**',
+      babelHelpers: 'runtime'
+    }),
+  ],
+  external: [/@babel\/runtime/]
+},
+{
+  input: 'src/plugin.ts',
+  output: {
+    name: MODULE_NAME,
+    file: 'dist/plugin.js',
+    format: 'umd',
+    exports: 'named',
+    extend: true,
+    globals: {
+      'webpack': 'webpack'
+    },
+    plugins: [
+      terser({
+        compress: {
+          ecma: 5,
+          pure_getters: true,
+        },
+      }),
+    ],
+  },
+  plugins: [
+    resolve({
+      jsnext: true,
+      main: true,
+      browser: true,
+    }),
+    // nodePolyfills(
+    //   { include: ['os', 'path', 'util'] }
+    // ),
+    json(),
+    commonjs({
+      ignoreDynamicRequires: true
+    }),
     typescript({
       tsconfig: 'tsconfig.json',
     }),
@@ -62,3 +106,4 @@ export default {
   ],
   external: ['webpack', /@babel\/runtime/]
 }
+]

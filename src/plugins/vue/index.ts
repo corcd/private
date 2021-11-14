@@ -2,14 +2,14 @@
  * @Author: Whzcorcd
  * @Date: 2021-11-04 14:34:36
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-05 11:22:33
+ * @LastEditTime: 2021-11-14 16:28:50
  * @Description: file content
  */
 import {
   isLegalTarget,
   isLegalParams,
 } from '@/utils'
-import { generateConfig } from '@/config'
+import { generateConfig } from '@/config/common'
 
 // @ts-ignore 浏览器端环境变量忽略检查
 const privateRunServer = APP_PRIVATE_RUN_SERVER

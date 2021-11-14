@@ -2,10 +2,16 @@
  * @Author: Whzcorcd
  * @Date: 2021-04-19 15:06:26
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-05 11:30:36
+ * @LastEditTime: 2021-11-12 16:30:44
  * @Description: file content
  */
-export const isBrowser = () => globalThis === window
+export const isBrowser = () => {
+  try {
+    !!window && globalThis === window
+  } catch (e) {
+    return false
+  }
+}
 
 export const isLegalTarget = <T>(value: T) => {
   if (String(value).length === 0) {

@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Test privatePlugin 1`] = `
+"function foo() {}
+
+const score = () => {};
+
+const bar = () => {
+  const temp = 15214;
+  console.log(temp);
+  const a = temp++;
+};
+
+const fooBar = wrapPrivate;
+fooBar();"
+`;

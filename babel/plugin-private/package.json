@@ -1,0 +1,36 @@
+{
+  "name": "@gdyfe/babel-plugin-private",
+  "version": "0.1.0",
+  "main": "index.js",
+  "author": "Whzcorcd <whzcorcd@gmail.com>",
+  "description": "私有化部署工具包增强插件",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "format": "prettier --check --write index.js",
+    "test": "jest",
+    "postinstall": " husky install"
+  },
+  "keywords": [
+    "gdyfe",
+    "babel",
+    "private",
+    "plugin"
+  ],
+  "homepage": "https://github.com/corcd/private",
+  "repository": "https://github.com/corcd/private.git",
+  "peerDependencies": {
+    "@babel/core": "^7.14.6"
+  },
+  "devDependencies": {
+    "@babel/template": "^7.16.0",
+    "@babel/types": "^7.16.0",
+    "@types/jest": "^27.0.2",
+    "husky": "^7.0.4",
+    "jest": "^27.3.1",
+    "prettier": "^2.4.1"
+  }
+}

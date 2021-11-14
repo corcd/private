@@ -2,9 +2,10 @@
  * @Author: Whzcorcd
  * @Date: 2021-02-19 16:44:44
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-05 14:20:00
+ * @LastEditTime: 2021-11-14 23:39:21
  * @Description: file content
 -->
+
 # @gdyfe/private
 
 云平台前端私有化部署标准工具包 V2
@@ -23,27 +24,35 @@ V2 版本存在破坏性更新，若仍使用旧版本，请访问 [V1 版本](h
 
 #### 直接引用
 
-- `dist/index.module.js` (ES Module)
+- `dist/index.module.js` & `dist/plugin.js`
 
 ## Description
 
 `@gdyfe/private` 在 V2 版本分成了三个部分，分别为 `PrivateDefinePlugin`、`WarpPlugin` 和 `VuePrivatePlugin`
 
-**`PrivateDefinePlugin`** 整合了原 `@gdyfe/private-define-plugin` 插件的能力，用以在 Webpack 环境下定义全局环境变量
+### PrivateDefinePlugin
 
-**`WarpPlugin`** 即为原插件内 `wrapPrivate()` 方法和 `getPrivateProperty()` 方法的集合
+`PrivateDefinePlugin` 整合了原 `@gdyfe/private-define-plugin` 插件的能力，用以在 Webpack 环境下定义全局环境变量
 
-**`VuePrivatePlugin`** 即为原 Vue 自定义指令插件
+> 从 dist/plugin.js 引入
+
+### WarpPlugin & VuePrivatePlugin
+
+`WarpPlugin` 即为原插件内 `wrapPrivate()` 方法和 `getPrivateProperty()` 方法的集合
+
+`VuePrivatePlugin` 即为原 Vue 自定义指令插件
+
+> 从 dist/index.js 引入
 
 ## Usage
 
 ### PrivateDefinePlugin
 
-基于 Webpack 的私有化部署参数定义插件
+基于 Webpack 4+ 的私有化部署参数定义插件，仅可在 Node 环境下使用
 
 ```javascript
 // webpack.config.js / vue.config.js
-const PrivateDefinePlugin = require('@gdyfe/private').PrivateDefinePlugin
+const PrivateDefinePlugin = require('@gdyfe/private/dist/plugin').default
 
 {
   ...
@@ -54,6 +63,16 @@ const PrivateDefinePlugin = require('@gdyfe/private').PrivateDefinePlugin
 }
 ```
 
+预定义的全局变量：
+
+- `APP_PRIVATE_RUN_SERVER` 私有化环境名
+
+- `APP_PRIVATE_STATUS` 私有化状态
+
+- `APP_PRIVATE_CONFIG` 私有化配置
+
+- `APP_PRIVATE_DATA` 私有化全局数据
+
 ### WarpPlugin
 
 #### 引入
@@ -63,25 +82,26 @@ import { WarpPlugin } from '@gdyfe/private'
 const { wrapPrivate, getPrivateProperty } = WarpPlugin
 ```
 
-#### wrapPrivate() 方法
+#### wrapPrivate 方法
 
 包装函数，根据使用模式和匹配的环境变量参数，来决定是否执行回调函数
 
-> 后续更新将考虑结合定制的 babel 插件在非对应环境中直接去除无副作用的函数部分
+> 可以结合定制开发的 babel 插件实现更完整的私有化处理，即在非对应环境中直接去除无副作用的函数部分
 
-`const wrapPrivate: (pattern: string, value: string[], fn: Function) => void`
+`const wrapPrivate[pattern](value: string[], fn: Function) => void`
 
 - pattern：使用模式，支持 `include` 和 `exclude`，`include` 表示允许执行，`exclude` 表示忽略执行
 - value：接受一个字符串数组参数，其中包含的元素即为匹配的环境变量参数
 - fn：回调函数
 
 ```javascript
-import { wrapPrivate } from '@gdyfe/private'
+import PrivatePlugin from '@gdyfe/private'
+const { wrapPrivate } = PrivatePlugin
 
-wrapPrivate('include', ['***'], () => {
+wrapPrivate.include(['***'], () => {
   // doing something
 })
-wrapPrivate('exclude', ['***'], () => {
+wrapPrivate.exclude(['***'], () => {
   // doing something
 })
 ```
@@ -93,14 +113,16 @@ wrapPrivate('exclude', ['***'], () => {
 ```javascript
 // Vue2 项目：
 import Vue from 'vue'
-import { VuePrivatePlugin } from '@gdyfe/private'
+import PrivatePlugin from '@gdyfe/private'
+const { VuePrivatePlugin } = PrivatePlugin
 
 Vue.use(VuePrivatePlugin)
 
 
 // Vue3 项目：
 import { createApp } from 'vue'
-import { VuePrivatePlugin } from '@gdyfe/private'
+import PrivatePlugin from '@gdyfe/private'
+const { VuePrivatePlugin } = PrivatePlugin
 
 createApp(app).use(VuePrivatePlugin)
 ```
@@ -136,11 +158,11 @@ createApp(app).use(VuePrivatePlugin)
 > 下列键名为插件保留的关键字，不能用作于 `targets` 下私有化全局配置变量的键名，否则可能会导致插件无法正常
 >
 > ```javascript
-> const PRIVATE_RUN_SERVER: string = 'APP_PRIVATE_RUN_SERVER'
-> const PRIVATE_STATUS: string = 'APP_PRIVATE_STATUS'
-> const PRIVATE_CONFIG: string = 'APP_PRIVATE_CONFIG'
-> const PRIVATE_GLOBAL_KEY: string = 'APP_PRIVATE_DATA'
-> const MODULE_NAME: string = 'private'
+> PRIVATE_RUN_SERVER = 'APP_PRIVATE_RUN_SERVER'
+> PRIVATE_STATUS = 'APP_PRIVATE_STATUS'
+> PRIVATE_CONFIG = 'APP_PRIVATE_CONFIG'
+> PRIVATE_GLOBAL_KEY = 'APP_PRIVATE_DATA'
+> MODULE_NAME = 'private'
 > ```
 
 ## Sample
@@ -154,13 +176,13 @@ module.exports = {
   targets:
   {
     cm: {
-      'APP_PORT': '80',
-      'APP_SSL_PORT': '443',
+      'APP_PORT': 80,
+      'APP_SSL_PORT': 443,
       'APP_RUN_ENV': 'production'
     },
     vvku: {
-      'APP_PORT': '80',
-      'APP_SSL_PORT': '443',
+      'APP_PORT': 80,
+      'APP_SSL_PORT': 443,
       'APP_RUN_ENV': 'production'
     },
     ...
@@ -195,6 +217,7 @@ Webpack >= 4.0.0
 - [x] 支持 Vue 3 生态
 - [ ] 路由级的函数 API
 - [ ] 低侵入式私有化权限控制
+- [x] 支持 Babel 插件增强功能
 
 ## License
 
