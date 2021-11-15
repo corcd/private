@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.1](https://github.com/corcd/private/compare/v2.1.0...v2.1.1) (2021-11-15)
+
+
+### Features
+
+* 支持 common 配置;修复已知的问题 ([e231369](https://github.com/corcd/private/commit/e231369122f93232ddafc5b0963d2409df4ef8b0))
+
 ## [2.1.0](https://github.com/corcd/private/compare/v2.0.4...v2.1.0) (2021-11-14)
 
 
