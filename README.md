@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2021-02-19 16:44:44
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-14 23:39:21
+ * @LastEditTime: 2021-11-15 15:35:33
  * @Description: file content
 -->
 
@@ -30,15 +30,15 @@ V2 版本存在破坏性更新，若仍使用旧版本，请访问 [V1 版本](h
 
 `@gdyfe/private` 在 V2 版本分成了三个部分，分别为 `PrivateDefinePlugin`、`WarpPlugin` 和 `VuePrivatePlugin`
 
-### PrivateDefinePlugin
+### PrivateDefinePlugin 插件
 
 `PrivateDefinePlugin` 整合了原 `@gdyfe/private-define-plugin` 插件的能力，用以在 Webpack 环境下定义全局环境变量
 
 > 从 dist/plugin.js 引入
 
-### WarpPlugin & VuePrivatePlugin
+### WrapPlugin 插件 & VuePrivatePlugin 插件
 
-`WarpPlugin` 即为原插件内 `wrapPrivate()` 方法和 `getPrivateProperty()` 方法的集合
+`WrapPlugin` 即为原插件内 `wrapPrivate()` 方法和 `getPrivateProperty()` 方法的集合
 
 `VuePrivatePlugin` 即为原 Vue 自定义指令插件
 
@@ -73,13 +73,13 @@ const PrivateDefinePlugin = require('@gdyfe/private/dist/plugin').default
 
 - `APP_PRIVATE_DATA` 私有化全局数据
 
-### WarpPlugin
+### WrapPlugin
 
 #### 引入
 
 ```javascript
-import { WarpPlugin } from '@gdyfe/private'
-const { wrapPrivate, getPrivateProperty } = WarpPlugin
+import PrivatePlugin from '@gdyfe/private'
+const { wrapPrivate, getPrivateProperty } = PrivatePlugin.WrapPlugin
 ```
 
 #### wrapPrivate 方法
@@ -96,7 +96,7 @@ const { wrapPrivate, getPrivateProperty } = WarpPlugin
 
 ```javascript
 import PrivatePlugin from '@gdyfe/private'
-const { wrapPrivate } = PrivatePlugin
+const { wrapPrivate } = PrivatePlugin.WrapPlugin
 
 wrapPrivate.include(['***'], () => {
   // doing something
@@ -149,11 +149,12 @@ createApp(app).use(VuePrivatePlugin)
 
 不再使用运行时配置，现在使用外部配置文件静态配置（例如：private.config.js/private.json/.privaterc 等）
 
-配置项包含 `enabled` 、 `independentSymbol` 和 `targets`（示例见下文）
+配置项包含 `enabled`、 `independentSymbol`、`common` 和 `targets`（示例见下文）
 
 - `enabled` 表示是否启用插件自定义指令功能（默认值为 `true`）
 - `independentSymbol` 表示是否使用独立命名的私有化数据获取标识（而非默认的 process.env 数据，默认值为 `true`）
-- `targets` 表示对应键名的环境下私有化全局配置变量对象
+- `common` 表示公共的私有化全局配置变量
+- `targets` 表示对应键名的环境下私有化全局配置变量对象，当其中存在与 `common` 中重名的变量时，会浅拷贝覆盖后者
 
 > 下列键名为插件保留的关键字，不能用作于 `targets` 下私有化全局配置变量的键名，否则可能会导致插件无法正常
 >
@@ -165,6 +166,18 @@ createApp(app).use(VuePrivatePlugin)
 > MODULE_NAME = 'private'
 > ```
 
+## Define
+
+Typescript 环境下，需要对全局变量进行定义，示例：
+
+```typescript
+// shims-private.d.ts
+declare const APP_PRIVATE_RUN_SERVER: string
+declare const APP_PRIVATE_STATUS: boolean
+declare const APP_PRIVATE_CONFIG: { enabled: boolean, independentSymbol: boolean}
+declare const APP_PRIVATE_DATA: Record<string, string | number>
+```
+
 ## Sample
 
 ### private.config.js
@@ -173,17 +186,19 @@ createApp(app).use(VuePrivatePlugin)
 module.exports = {
   enabled: true,
   independentSymbol: false,
+  common: {
+    'APP_PORT': 80,
+    'APP_SSL_PORT': 443,
+  },
   targets:
   {
     cm: {
-      'APP_PORT': 80,
-      'APP_SSL_PORT': 443,
       'APP_RUN_ENV': 'production'
     },
     vvku: {
-      'APP_PORT': 80,
-      'APP_SSL_PORT': 443,
-      'APP_RUN_ENV': 'production'
+      'APP_PORT': 8080,
+      'APP_SSL_PORT': 8443,
+      'APP_RUN_ENV': 'development'
     },
     ...
   }

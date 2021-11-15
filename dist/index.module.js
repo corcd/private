@@ -11,13 +11,6 @@ const isLegalParams = (value) => {
     }
     return true;
 };
-const isLegalPattern = (value) => {
-    if (typeof value !== 'string' ||
-        (value !== 'include' && value !== 'exclude')) {
-        throw new Error('PRIVATE: 不合法的方式');
-    }
-    return true;
-};
 const isFunction = (value) => {
     if (typeof value !== 'function') {
         throw new Error('PRIVATE: 不合法的执行函数');
@@ -39,28 +32,32 @@ const generateConfig = () => {
 const privateRunServer$1 = APP_PRIVATE_RUN_SERVER;
 const privateData$1 = APP_PRIVATE_DATA;
 const { independentSymbol: independentSymbol$1 } = generateConfig();
-const wrapPrivate = (pattern = 'include', value = [], fn = (v) => { }) => {
-    isLegalPattern(pattern);
-    for (const i in value) {
-        isLegalParams(i);
-    }
-    isFunction(fn);
-    const target = independentSymbol$1
-        ? privateRunServer$1
-        : process.env.run_server;
-    const config = independentSymbol$1 ? (privateData$1 || {}) : process.env;
-    isLegalTarget(target);
-    if (value.includes(target)) {
-        pattern === 'include' && fn(config);
-    }
-    else {
-        pattern === 'exclude' && fn(config);
-    }
+const wrapPrivate = {
+    include: (value = [], fn = (v) => { }) => {
+        isLegalParams(value);
+        isFunction(fn);
+        const target = independentSymbol$1
+            ? privateRunServer$1
+            : process.env.run_server;
+        const config = independentSymbol$1 ? (privateData$1 || {}) : process.env;
+        isLegalTarget(target);
+        value.includes(target) && fn(config);
+    },
+    exclude: (value = [], fn = (v) => { }) => {
+        isLegalParams(value);
+        isFunction(fn);
+        const target = independentSymbol$1
+            ? privateRunServer$1
+            : process.env.run_server;
+        const config = independentSymbol$1 ? (privateData$1 || {}) : process.env;
+        isLegalTarget(target);
+        !value.includes(target) && fn(config);
+    },
 };
 const getPrivateProperty = () => {
     return independentSymbol$1 ? (privateData$1 || {}) : process.env;
 };
-var WarpPlugin = { wrapPrivate, getPrivateProperty };
+var WrapPlugin = { wrapPrivate, getPrivateProperty };
 
 const privateRunServer = APP_PRIVATE_RUN_SERVER;
 const privateStatus = APP_PRIVATE_STATUS;
@@ -120,6 +117,6 @@ const VuePrivatePlugin = {
     }
 };
 
-var index = { WarpPlugin, VuePrivatePlugin };
+var index = { WrapPlugin, VuePrivatePlugin };
 
 export { index as default };

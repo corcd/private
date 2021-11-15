@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2021-02-22 11:02:24
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-14 16:27:40
+ * @LastEditTime: 2021-11-15 15:21:05
  * @Description: file content
  */
 import webpack from 'webpack'
@@ -22,10 +22,10 @@ export class PrivateDefinePlugin extends webpack.DefinePlugin {
   constructor() {
     const env = String(process.env.run_server)
     const isPrivate = Boolean(process.env.private) || false
-    const { enabled, independentSymbol, targets } = loadConfig()
+    const { enabled, independentSymbol, common, targets } = loadConfig()
     super(
       deepJsonStringify({
-        [PRIVATE_GLOBAL_KEY]: cloneDeep(targets[env] || {}),
+        [PRIVATE_GLOBAL_KEY]: cloneDeep(Object.assign(common || {}, targets[env] || {})),
         [PRIVATE_CONFIG]: cloneDeep({
           enabled,
           independentSymbol

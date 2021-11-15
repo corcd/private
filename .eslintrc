@@ -4,6 +4,12 @@
     "browser": true,
     "node": true
   },
+  "globals": {
+    "APP_PRIVATE_RUN_SERVER": "readonly",
+    "APP_PRIVATE_STATUS": "readonly",
+    "APP_PRIVATE_CONFIG": "readonly",
+    "APP_PRIVATE_DATA": "readonly"
+  },
   "extends": [
     "eslint:recommended"
   ],

@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2021-11-14 16:26:22
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-14 16:28:18
+ * @LastEditTime: 2021-11-15 16:01:47
  * @Description: file content
  */
 import { cosmiconfigSync } from 'cosmiconfig'
@@ -12,6 +12,7 @@ import { MODULE_NAME } from '@/keys'
 export interface IConfig {
   enabled: boolean
   independentSymbol: boolean
+  common: Record<string, string | number> | undefined
   targets: Record<string, Record<string, string>>
 }
 
@@ -35,7 +36,6 @@ export const loadConfig = () => {
 
   try {
     const result = explorerSync.search()
-    console.log('result', result)
 
     // if (result && result.config[PRIVATE_RUN_SERVER]) {
     //   return result.config[PRIVATE_RUN_SERVER]

@@ -2,6 +2,7 @@ logs/
 npm-debug.log
 yarn-error.log
 node_modules/
+pnpm-global/
 package-lock.json
 yarn.lock
 coverage/

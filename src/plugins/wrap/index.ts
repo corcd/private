@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2021-11-04 14:33:46
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-14 22:22:05
+ * @LastEditTime: 2021-11-15 15:12:30
  * @Description: file content
  */
 import { isFunction, isLegalParams, isLegalPattern, isLegalTarget } from "@/utils"
@@ -38,9 +38,7 @@ const { independentSymbol } = generateConfig()
 
 export const wrapPrivate = {
   include: (value: string[] = [], fn = <T>(v: T) => { }) => {
-    for (const i in value) {
-      isLegalParams(i)
-    }
+    isLegalParams(value)
     isFunction(fn)
 
     const target = independentSymbol
@@ -49,12 +47,10 @@ export const wrapPrivate = {
     const config = independentSymbol ? (privateData || {}) : process.env
 
     isLegalTarget(target)
-    fn(config)
+    value.includes(target) && fn(config)
   },
   exclude: (value: string[] = [], fn = <T>(v: T) => { }) => {
-    for (const i in value) {
-      isLegalParams(i)
-    }
+    isLegalParams(value)
     isFunction(fn)
 
     const target = independentSymbol
@@ -63,7 +59,7 @@ export const wrapPrivate = {
     const config = independentSymbol ? (privateData || {}) : process.env
 
     isLegalTarget(target)
-    fn(config)
+    !value.includes(target) && fn(config)
   },
 }
 
