@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/corcd/private/compare/v2.1.1...v2.2.0) (2021-11-20)
+
+
+### Features
+
+* 支持多环境预配置和命令行工具 ([b12472a](https://github.com/corcd/private/commit/b12472a2ffb01ed0a987aad29f81ab3fd8746ff3))
+
 ### [2.1.1](https://github.com/corcd/private/compare/v2.1.0...v2.1.1) (2021-11-15)
 
 
