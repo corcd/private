@@ -19,7 +19,13 @@ const isFunction = (value) => {
 };
 
 const generateConfig = () => {
-    const privateConfig = APP_PRIVATE_CONFIG;
+    let privateConfig = null;
+    try {
+        privateConfig = APP_PRIVATE_CONFIG;
+    }
+    catch (err) {
+        privateConfig = process.env.config;
+    }
     return privateConfig ? {
         enabled: privateConfig.enabled,
         independentSymbol: privateConfig.independentSymbol
@@ -29,65 +35,54 @@ const generateConfig = () => {
     };
 };
 
-const privateRunServer$1 = APP_PRIVATE_RUN_SERVER;
-const privateData$1 = APP_PRIVATE_DATA;
 const { independentSymbol: independentSymbol$1 } = generateConfig();
+const privateRunServer$1 = independentSymbol$1 ? APP_PRIVATE_RUN_SERVER : process.env.run_server;
+const privateData$1 = independentSymbol$1 ? APP_PRIVATE_DATA : process.env.data;
+const getPrivateProperty = () => {
+    return privateData$1 || {};
+};
 const wrapPrivate = {
     include: (value = [], fn = (v) => { }) => {
         isLegalParams(value);
         isFunction(fn);
-        const target = independentSymbol$1
-            ? privateRunServer$1
-            : process.env.run_server;
-        const config = independentSymbol$1 ? (privateData$1 || {}) : process.env;
-        isLegalTarget(target);
-        value.includes(target) && fn(config);
+        isLegalTarget(privateRunServer$1);
+        value.includes(privateRunServer$1) && fn(getPrivateProperty());
     },
     exclude: (value = [], fn = (v) => { }) => {
         isLegalParams(value);
         isFunction(fn);
-        const target = independentSymbol$1
-            ? privateRunServer$1
-            : process.env.run_server;
-        const config = independentSymbol$1 ? (privateData$1 || {}) : process.env;
-        isLegalTarget(target);
-        !value.includes(target) && fn(config);
+        isLegalTarget(privateRunServer$1);
+        !value.includes(privateRunServer$1) && fn(getPrivateProperty());
     },
-};
-const getPrivateProperty = () => {
-    return independentSymbol$1 ? (privateData$1 || {}) : process.env;
 };
 var WrapPlugin = { wrapPrivate, getPrivateProperty };
 
-const privateRunServer = APP_PRIVATE_RUN_SERVER;
-const privateStatus = APP_PRIVATE_STATUS;
-const privateData = APP_PRIVATE_DATA;
 const { enabled, independentSymbol } = generateConfig();
+const privateRunServer = independentSymbol ? APP_PRIVATE_RUN_SERVER : process.env.run_server;
+const privateStatus = independentSymbol ? APP_PRIVATE_STATUS : process.env.private;
+const privateData = independentSymbol ? APP_PRIVATE_DATA : process.env.data;
 const VuePrivatePlugin = {
     install: (Vue) => {
         const globalPrototype = Vue.version.slice(0, 2) === '3.' ? Vue.config.globalProperties : Vue.prototype;
-        const target = independentSymbol
-            ? privateRunServer
-            : process.env.run_server;
-        globalPrototype.$privateConfig = { enabled, independentSymbol, target };
+        globalPrototype.$privateConfig = { enabled, independentSymbol, target: privateRunServer };
         Vue.directive('private', {
             inserted: (el, binding) => {
                 if (!enabled) {
                     return;
                 }
-                isLegalTarget(target);
+                isLegalTarget(privateRunServer);
                 const { arg, value } = binding;
                 switch (arg) {
                     case 'include': {
                         isLegalParams(value);
-                        if (!value.includes(target)) {
+                        if (!value.includes(privateRunServer)) {
                             el.parentNode && el.parentNode.removeChild(el);
                         }
                         break;
                     }
                     case 'exclude': {
                         isLegalParams(value);
-                        if (value.includes(target)) {
+                        if (value.includes(privateRunServer)) {
                             el.parentNode && el.parentNode.removeChild(el);
                         }
                         break;
@@ -98,19 +93,13 @@ const VuePrivatePlugin = {
         Vue.mixin({
             computed: {
                 privateStatus() {
-                    return independentSymbol
-                        ? privateStatus
-                        : process.env.private;
+                    return privateStatus;
                 },
                 privateRunServer() {
-                    return independentSymbol
-                        ? privateRunServer
-                        : process.env.run_server;
+                    return privateRunServer;
                 },
                 privateData() {
-                    return independentSymbol
-                        ? privateData
-                        : process.env;
+                    return privateData;
                 },
             },
         });

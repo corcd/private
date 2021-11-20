@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2021-04-19 15:06:26
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-12 16:30:44
+ * @LastEditTime: 2021-11-20 20:24:10
  * @Description: file content
  */
 export const isBrowser = () => {

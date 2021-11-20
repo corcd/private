@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2021-02-22 11:02:24
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-15 15:21:05
+ * @LastEditTime: 2021-11-19 16:43:54
  * @Description: file content
  */
 import webpack from 'webpack'
@@ -24,7 +24,7 @@ export class PrivateDefinePlugin extends webpack.DefinePlugin {
     const isPrivate = Boolean(process.env.private) || false
     const { enabled, independentSymbol, common, targets } = loadConfig()
     super(
-      deepJsonStringify({
+      deepJsonStringify(independentSymbol ? {
         [PRIVATE_GLOBAL_KEY]: cloneDeep(Object.assign(common || {}, targets[env] || {})),
         [PRIVATE_CONFIG]: cloneDeep({
           enabled,
@@ -32,6 +32,14 @@ export class PrivateDefinePlugin extends webpack.DefinePlugin {
         }),
         [PRIVATE_RUN_SERVER]: env || '',
         [PRIVATE_STATUS]: isPrivate
+      } : {
+        'process.env.data': cloneDeep(Object.assign(common || {}, targets[env] || {})),
+        'process.env.config': cloneDeep({
+          enabled,
+          independentSymbol
+        }),
+        'process.env.run_server': env || '',
+        'process.env.private': isPrivate
       })
     )
   }

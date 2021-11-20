@@ -2,7 +2,7 @@
  * @Author: Whzcorcd
  * @Date: 2021-02-19 16:44:44
  * @LastEditors: Whzcorcd
- * @LastEditTime: 2021-11-15 15:35:33
+ * @LastEditTime: 2021-11-20 22:43:26
  * @Description: file content
 -->
 
@@ -28,7 +28,11 @@ V2 版本存在破坏性更新，若仍使用旧版本，请访问 [V1 版本](h
 
 ## Description
 
-`@gdyfe/private` 在 V2 版本分成了三个部分，分别为 `PrivateDefinePlugin`、`WarpPlugin` 和 `VuePrivatePlugin`
+`@gdyfe/private` 在 V2.2+ 版本分成了四个部分，除了 `Private-Cli` 命令行工具外，其余三个部分分别为 `PrivateDefinePlugin`、`WarpPlugin` 和 `VuePrivatePlugin`
+
+### Private-Cli 命令行工具
+
+`Private-Cli` 命令行工具提供了整合式执行命令行，可以在无需手动增加 package.json 的配置的情况下，实现多环境目标命令执行
 
 ### PrivateDefinePlugin 插件
 
@@ -45,6 +49,42 @@ V2 版本存在破坏性更新，若仍使用旧版本，请访问 [V1 版本](h
 > 从 dist/index.js 引入
 
 ## Usage
+
+### Private-Cli 命令行工具
+
+使用 `private-cli` 访问此命令行工具，需要预先安装 Node 环境
+
+#### private-cli version
+
+```bash
+private-cli --version / -v
+```
+
+查看命令行工具版本
+
+#### private-cli create
+
+```bash
+private-cli create
+```
+
+创建 private.config.js 模板文件
+
+#### private-cli build
+
+```bash
+private-cli build <env>
+```
+
+执行对应环境的预定义的构建命令
+
+#### private-cli serve
+
+```bash
+private-cli serve <env>
+```
+
+执行对应环境的预定义的开发命令
 
 ### PrivateDefinePlugin
 
@@ -149,10 +189,11 @@ createApp(app).use(VuePrivatePlugin)
 
 不再使用运行时配置，现在使用外部配置文件静态配置（例如：private.config.js/private.json/.privaterc 等）
 
-配置项包含 `enabled`、 `independentSymbol`、`common` 和 `targets`（示例见下文）
+配置项包含 `enabled`、 `independentSymbol`、`env`、 `common` 和 `targets`（示例见下文）
 
 - `enabled` 表示是否启用插件自定义指令功能（默认值为 `true`）
 - `independentSymbol` 表示是否使用独立命名的私有化数据获取标识（而非默认的 process.env 数据，默认值为 `true`）
+- `env` 表示环境配置
 - `common` 表示公共的私有化全局配置变量
 - `targets` 表示对应键名的环境下私有化全局配置变量对象，当其中存在与 `common` 中重名的变量时，会浅拷贝覆盖后者
 
@@ -163,6 +204,8 @@ createApp(app).use(VuePrivatePlugin)
 > PRIVATE_STATUS = 'APP_PRIVATE_STATUS'
 > PRIVATE_CONFIG = 'APP_PRIVATE_CONFIG'
 > PRIVATE_GLOBAL_KEY = 'APP_PRIVATE_DATA'
+> 
+> CI_CONFIG_NAME = 'ci-config'
 > MODULE_NAME = 'private'
 > ```
 
@@ -186,6 +229,19 @@ declare const APP_PRIVATE_DATA: Record<string, string | number>
 module.exports = {
   enabled: true,
   independentSymbol: false,
+  env: [
+    {
+      name: 'huawei',
+      cmd: {
+        build: ['build'],
+        serve: ['serve']
+      },
+      options: {
+        private: true,
+        run_server: 'huawei'
+      }
+    }
+  ],
   common: {
     'APP_PORT': 80,
     'APP_SSL_PORT': 443,
@@ -224,6 +280,7 @@ module.exports = {
 
 ## 项目依赖
 
+Node >= 14.0.0
 Webpack >= 4.0.0
 
 ## Todo
@@ -233,6 +290,7 @@ Webpack >= 4.0.0
 - [ ] 路由级的函数 API
 - [ ] 低侵入式私有化权限控制
 - [x] 支持 Babel 插件增强功能
+- [x] 支持命令行工具
 
 ## License
 

@@ -10,6 +10,7 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "declaration": true,
     "strict": true,
     "preserveSymlinks": true,
